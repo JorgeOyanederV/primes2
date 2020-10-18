@@ -10,7 +10,7 @@ repositories {
 }
 
 dependencies {
-    // Repositorio from maven:
+    // Repository from maven:
     // https://mvnrepository.com/
 
     // JUnit
