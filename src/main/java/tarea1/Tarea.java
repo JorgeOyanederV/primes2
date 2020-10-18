@@ -4,6 +4,9 @@ import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -22,7 +25,10 @@ public class Tarea {
      *
      * @param args to use.
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
+
+        //The MAX
+        final long MAX = 200000;
 
         // The Chrono
         final StopWatch stopWatch = StopWatch.createStarted();
@@ -34,30 +40,53 @@ public class Tarea {
          *
          * Thread thread = new Thread(new PrimeTask(82731237L));
          *
-         * // log.debug("Prime? {}.", PrimeTask.isPrime(82731237L));
-         *
          * thread.run();
          */
 
+        /**
+         * For more than one thread or one thread.
+         */
 
-        // Time:
-        log.info("Done in {}.", stopWatch);
+        // The "Executer"
+        final ExecutorService executorService = Executors.newFixedThreadPool(1);
+
+        // Create the MAX runnables and pass to the executor
+        for (long i = 1 ; i < MAX; i++){
+            executorService.submit(new PrimeTask(i));
+        }
+
+        // Don't receive more tasks
+        executorService.shutdown();
+
+        // Wait for some time
+        if (executorService.awaitTermination(1, TimeUnit.HOURS)){
+            log.debug("Primes founded: {} in {}.", PrimeTask.getPrimes(), stopWatch);
+        }
+        else {
+            // Time:
+            log.info("Done in {}.", stopWatch);
+        }
+
+
+
+
+
     }
 
     /**
      * Class to calculate the prime.
      */
-    private static class PrimeTask implements Runnable {
+     private static class PrimeTask implements Runnable {
 
         /**
          * The Number
          */
-        private static long number;
+        private final long number;
 
         /**
          * The Counter.
          */
-        private final AtomicInteger counter = new AtomicInteger(0);
+        private final static AtomicInteger counter = new AtomicInteger(0);
 
         /**
          * The Constructor.
@@ -76,9 +105,6 @@ public class Tarea {
             if (isPrime(this.number)){
                 log.debug("{} was a Prime !!!", this.number);
                 counter.getAndIncrement();
-            }
-            else{
-                log.debug("{} was not a Prime !!!", this.number);
             }
         }
 
@@ -113,5 +139,12 @@ public class Tarea {
 
         }
 
+        /**
+         *
+         * @return the numbers of primes.
+         */
+        public static int getPrimes(){
+            return counter.get();
+        }
     }
 }
