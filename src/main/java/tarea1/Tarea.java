@@ -28,30 +28,18 @@ public class Tarea {
     public static void main(String[] args) throws InterruptedException {
 
         //The MAX
-        final long MAX = 200000;
+        final long MAX = 3000000;
 
         // The Chrono
         final StopWatch stopWatch = StopWatch.createStarted();
 
         log.debug("Stating the Main ...");
 
-        /**
-         * For One Thread
-         *
-         * Thread thread = new Thread(new PrimeTask(82731237L));
-         *
-         * thread.run();
-         */
-
-        /**
-         * For more than one thread or one thread.
-         */
-
         // The "Executer"
-        final ExecutorService executorService = Executors.newFixedThreadPool(1);
+        final ExecutorService executorService = Executors.newFixedThreadPool(12);
 
         // Create the MAX runnables and pass to the executor
-        for (long i = 1 ; i < MAX; i++){
+        for (long i = 2 ; i < MAX; i++){
             executorService.submit(new PrimeTask(i));
         }
 
@@ -66,10 +54,6 @@ public class Tarea {
             // Time:
             log.info("Done in {}.", stopWatch);
         }
-
-
-
-
 
     }
 
@@ -95,17 +79,6 @@ public class Tarea {
          */
         public PrimeTask(final long number){
             this.number = number;
-        }
-
-        /**
-         * Run the code. (Parallel Mode)
-         */
-        @Override
-        public void run() {
-            if (isPrime(this.number)){
-                log.debug("{} was a Prime !!!", this.number);
-                counter.getAndIncrement();
-            }
         }
 
         /**
@@ -145,6 +118,16 @@ public class Tarea {
          */
         public static int getPrimes(){
             return counter.get();
+        }
+
+        /**
+         * Run the code. (Parallel Mode)
+         */
+        @Override
+        public void run() {
+            if (isPrime(this.number)){
+                counter.getAndIncrement();
+            }
         }
     }
 }
