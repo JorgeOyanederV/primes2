@@ -4,9 +4,7 @@ import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -28,7 +26,7 @@ public class Tarea {
     public static void main(String[] args) throws InterruptedException {
 
         //The MAX
-        final long MAX = 3000000;
+        final long MAX = 100000000;
 
         // The Chrono
         final StopWatch stopWatch = StopWatch.createStarted();
@@ -36,10 +34,15 @@ public class Tarea {
         log.debug("Stating the Main ...");
 
         // The "Executer"
-        final ExecutorService executorService = Executors.newFixedThreadPool(12);
+        final ExecutorService executorService = new ThreadPoolExecutor(4,
+                8,
+                0L,
+                TimeUnit.MILLISECONDS,
+                new ArrayBlockingQueue<>(8),
+                new ThreadPoolExecutor.CallerRunsPolicy());
 
         // Create the MAX runnables and pass to the executor
-        for (long i = 2 ; i < MAX; i++){
+        for (long i = 1 ; i < MAX; i++){
             executorService.submit(new PrimeTask(i));
         }
 
@@ -89,19 +92,21 @@ public class Tarea {
          */
         private static boolean isPrime(final long n) {
 
-            // Can't process negative numbers
-            if (n <= 0) {
-                throw new IllegalArgumentException("Error in n: Can't process negative numbers");
-            }
-
             // "One" isn't prime!
             if (n == 1) {
                 return false;
             }
+            // "Twi" is Prime.
+            if (n == 2) {
+                return true;
+            }
+            // Par numbers aren't Prime
+            if (n % 2 == 0) {
+                return false;
+            }
 
-            // Testing primality from 2 to n-1
-            // TODO: Change to n/2 the upper limit (??)
-            for (long i = 2; i < n / 2; i++) {
+            // Testing primality for impar numbers
+            for (long i = 3; i * i <= n; i+=2) {
 
                 // If module == 0 -> not prime!
                 if (n % i == 0) {
